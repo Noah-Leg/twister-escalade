@@ -1,4 +1,4 @@
-const CACHE_NAME = "twister-escalade-v1";
+const CACHE_NAME = "twister-escalade-v2";
 
 const FILES_TO_CACHE = [
   "./",
@@ -35,9 +35,18 @@ self.addEventListener("activate", function (event) {
 });
 
 self.addEventListener("fetch", function (event) {
+  if (event.request.method !== "GET") {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then(function (cachedResponse) {
-      return cachedResponse || fetch(event.request);
+      return (
+        cachedResponse ||
+        fetch(event.request).then(function (networkResponse) {
+          return networkResponse;
+        })
+      );
     })
   );
 });
