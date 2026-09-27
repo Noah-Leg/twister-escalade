@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Twister Escalade</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#667eea">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      color: white;
+      background-color: #171923;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 600px;
+      margin: auto;
+      padding: 24px;
+      border-radius: 24px;
+      background-color: #252836;
+    }
+
+    h1 {
+      margin-top: 0;
+    }
+
+    .description {
+      color: #cbd5e0;
+    }
+
+    .colors {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin: 24px 0;
+    }
+
+    .color-button {
+      min-width: 100px;
+      padding: 12px;
+      border: 3px solid transparent;
+      border-radius: 12px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      opacity: 0.45;
+    }
+
+    .color-button.selected {
+      border-color: white;
+      opacity: 1;
+      transform: scale(1.06);
+    }
+
+    .red {
+      background-color: #e53e3e;
+    }
+
+    .blue {
+      background-color: #3182ce;
+    }
+
+    .green {
+      background-color: #38a169;
+    }
+
+    .yellow {
+      color: #222;
+      background-color: #f6e05e;
+    }
+
+    .orange {
+      background-color: #dd6b20;
+    }
+
+    .purple {
+      background-color: #805ad5;
+    }
+
+    .pink {
+      background-color: #d53f8c;
+    }
+
+    .black {
+      background-color: #111;
+    }
+
+    .white {
+      color: #222;
+      background-color: #f7fafc;
+    }
+
+    #instruction {
+      display: flex;
+      min-height: 170px;
+      margin: 28px 0;
+      padding: 24px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 20px;
+      background-color: #12141c;
+      font-size: 32px;
+      font-weight: bold;
+    }
+
+    #next-button {
+      width: 100%;
+      padding: 18px;
+      border: none;
+      border-radius: 14px;
+      color: white;
+      background-color: #667eea;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #next-button:hover {
+      background-color: #5a67d8;
+    }
+
+    .option {
+      display: block;
+      margin: 18px 0;
+    }
+
+    .warning {
+      margin-top: 22px;
+      color: #fbd38d;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <h1>🧗 Twister Escalade</h1>
+
+    <p class="description">
+      Sélectionne les couleurs présentes sur le mur.
+    </p>
+
+    <section class="colors">
+      <button class="color-button red" data-color="rouge">
+        Rouge
+      </button>
+
+      <button class="color-button blue" data-color="bleue">
+        Bleu
+      </button>
+
+      <button class="color-button green" data-color="verte">
+        Vert
+      </button>
+
+      <button class="color-button yellow" data-color="jaune">
+        Jaune
+      </button>
+
+      <button class="color-button orange" data-color="orange">
+        Orange
+      </button>
+
+      <button class="color-button purple" data-color="violette">
+        Violet
+      </button>
+
+      <button class="color-button pink" data-color="rose">
+        Rose
+      </button>
+
+      <button class="color-button black" data-color="noire">
+        Noir
+      </button>
+
+      <button class="color-button white" data-color="blanche">
+        Blanc
+      </button>
+    </section>
+
+    <label class="option">
+      <input type="checkbox" id="voice" checked>
+      Lire les instructions à voix haute
+    </label>
+
+    <section id="instruction">
+      Choisis au moins une couleur
+    </section>
+
+    <button id="next-button">
+      Nouvelle instruction
+    </button>
+
+    <p class="warning">
+      ⚠️ Utilise l’application sur un mur bas, avec des tapis et sous la
+      surveillance d’une personne compétente.
+    </p>
+  </main>
+
+  <script>
+    const colorButtons = document.querySelectorAll(".color-button");
+    const instructionElement = document.querySelector("#instruction");
+    const nextButton = document.querySelector("#next-button");
+    const voiceCheckbox = document.querySelector("#voice");
+
+    const bodyParts = [
+      "Main gauche",
+      "Main droite",
+      "Pied gauche",
+      "Pied droit"
+    ];
+
+    let previousInstruction = "";
+
+    colorButtons.forEach(function (button) {
+      button.addEventListener("click", function () {
+        button.classList.toggle("selected");
+      });
+    });
+
+    function randomItem(array) {
+      const randomNumber = Math.floor(Math.random() * array.length);
+      return array[randomNumber];
+    }
+
+    function getSelectedColors() {
+      const selectedButtons = document.querySelectorAll(
+        ".color-button.selected"
+      );
+
+      return Array.from(selectedButtons).map(function (button) {
+        return button.dataset.color;
+      });
+    }
+
+    function speak(text) {
+      if (!voiceCheckbox.checked) {
+        return;
+      }
+
+      if (!("speechSynthesis" in window)) {
+        return;
+      }
+
+      window.speechSynthesis.cancel();
+
+      const message = new SpeechSynthesisUtterance(text);
+      message.lang = "fr-FR";
+      message.rate = 0.9;
+
+      window.speechSynthesis.speak(message);
+    }
+
+    function generateInstruction() {
+      const selectedColors = getSelectedColors();
+
+      if (selectedColors.length === 0) {
+        instructionElement.textContent =
+          "Sélectionne au moins une couleur.";
+        return;
+      }
+
+      let instruction = "";
+      let attempts = 0;
+
+      /*
+        Cette boucle évite de donner deux fois de suite
+        exactement la même instruction.
+      */
+      do {
+        const bodyPart = randomItem(bodyParts);
+        const color = randomItem(selectedColors);
+
+        instruction = bodyPart + " sur une prise " + color;
+        attempts++;
+      } while (
+        instruction === previousInstruction &&
+        attempts < 10
+      );
+
+      previousInstruction = instruction;
+      instructionElement.textContent = instruction;
+
+      speak(instruction);
+    }
+
+    nextButton.addEventListener("click", generateInstruction);
+
+    /*
+      On peut également appuyer sur la barre d'espace
+      pour obtenir une nouvelle instruction.
+    */
+    document.addEventListener("keydown", function (event) {
+  if (event.code === "Space") {
+    event.preventDefault();
+    generateInstruction();
+  }
+});
+</script>
+
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker
+        .register("./service-worker.js")
+        .then(function () {
+          console.log("Application prête à fonctionner hors ligne.");
+        })
+        .catch(function (error) {
+          console.error("Erreur du service worker :", error);
+        });
+    });
+  }
+</script>
+
+</body>
+</html>
+
